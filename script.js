@@ -57,6 +57,36 @@ document.querySelectorAll('.ir').forEach((el, i) => {
   io.observe(el);
 });
 
+/* ---------- Event photo carousel ---------- */
+document.querySelectorAll('.event-gallery').forEach(function (gallery) {
+  const imgs = gallery.querySelectorAll('.gallery-track img');
+  const dots = gallery.querySelectorAll('.gallery-dots .dot');
+  const prev = gallery.querySelector('.gallery-btn.prev');
+  const next = gallery.querySelector('.gallery-btn.next');
+  let cur = 0;
+
+  function go(idx) {
+    imgs[cur].classList.remove('active');
+    dots[cur].classList.remove('active');
+    cur = (idx + imgs.length) % imgs.length;
+    imgs[cur].classList.add('active');
+    dots[cur].classList.add('active');
+  }
+
+  prev.addEventListener('click', function () { go(cur - 1); });
+  next.addEventListener('click', function () { go(cur + 1); });
+  dots.forEach(function (dot, i) { dot.addEventListener('click', function () { go(i); }); });
+
+  let touchX = null;
+  gallery.addEventListener('touchstart', function (e) { touchX = e.touches[0].clientX; }, { passive: true });
+  gallery.addEventListener('touchend', function (e) {
+    if (touchX === null) return;
+    const diff = touchX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) go(diff > 0 ? cur + 1 : cur - 1);
+    touchX = null;
+  }, { passive: true });
+});
+
 /* ---------- Hero vector / embedding field ---------- */
 (function () {
   const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
