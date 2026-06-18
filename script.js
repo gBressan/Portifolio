@@ -87,6 +87,77 @@ document.querySelectorAll('.event-gallery').forEach(function (gallery) {
   }, { passive: true });
 });
 
+/* ---------- Terminal typewriter ---------- */
+(function () {
+  const output = document.getElementById('term-output');
+  const langEl = document.getElementById('term-lang');
+  if (!output || !langEl) return;
+
+  const snippets = [
+    {
+      lang: 'python',
+      code: `# RAG pipeline with agentic tools
+query  = request.get("message")
+ctx    = elastic.search(embed(query))
+
+answer = llm.invoke(
+    messages=[*ctx, query],
+    tools=[search_tool, calc_tool]
+)
+
+langfuse.trace(query, answer)
+return answer`
+    },
+    {
+      lang: 'java · spring boot',
+      code: `@PostMapping("/chat")
+public ResponseEntity<String> chat(
+        @RequestBody ChatRequest req) {
+
+    var ctx = elastic
+        .search(embed(req.message()));
+
+    return ResponseEntity.ok(
+        llm.invoke(ctx, req.message())
+    );
+}`
+    }
+  ];
+
+  const TYPE_DELAY = 38, DELETE_DELAY = 16, PAUSE_AFTER = 2200, PAUSE_BEFORE = 400;
+  let si = 0, ci = 0, typing = true, timeout = null;
+
+  function tick() {
+    const { lang, code } = snippets[si];
+    if (typing) {
+      ci++;
+      output.textContent = code.slice(0, ci);
+      if (ci < code.length) {
+        timeout = setTimeout(tick, TYPE_DELAY);
+      } else {
+        typing = false;
+        timeout = setTimeout(tick, PAUSE_AFTER);
+      }
+    } else {
+      if (ci > 0) {
+        ci--;
+        output.textContent = code.slice(0, ci);
+        timeout = setTimeout(tick, DELETE_DELAY);
+      } else {
+        si = (si + 1) % snippets.length;
+        langEl.textContent = snippets[si].lang;
+        typing = true;
+        timeout = setTimeout(tick, PAUSE_BEFORE);
+      }
+    }
+  }
+
+  const observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) { observer.disconnect(); tick(); }
+  }, { threshold: 0.2 });
+  observer.observe(output.closest('.pipeline'));
+})();
+
 /* ---------- Hero vector / embedding field ---------- */
 (function () {
   const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
