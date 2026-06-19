@@ -92,6 +92,7 @@ document.querySelectorAll('.event-gallery').forEach(function (gallery) {
   const output = document.getElementById('term-output');
   const langEl = document.getElementById('term-lang');
   if (!output || !langEl) return;
+  const termBody = output.closest('.term-body');
 
   const snippets = [
     {
@@ -132,6 +133,7 @@ public ResponseEntity<String> chat(
     if (typing) {
       ci++;
       output.textContent = code.slice(0, ci);
+      if (termBody) termBody.scrollTop = termBody.scrollHeight;
       if (ci < code.length) {
         timeout = setTimeout(tick, TYPE_DELAY);
       } else {
@@ -142,6 +144,7 @@ public ResponseEntity<String> chat(
       if (ci > 0) {
         ci--;
         output.textContent = code.slice(0, ci);
+      if (termBody) termBody.scrollTop = termBody.scrollHeight;
         timeout = setTimeout(tick, DELETE_DELAY);
       } else {
         si = (si + 1) % snippets.length;
